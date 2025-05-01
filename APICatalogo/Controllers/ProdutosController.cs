@@ -2,6 +2,7 @@
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,23 +18,31 @@ namespace APICatalogo.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<Produto>> Get()
+        // /produtos/primeiro
+        [HttpGet("primeiro")]
+        public ActionResult<Produto> GetPrimeiro()
         {
-            var produtos = _context.Produtos.AsNoTracking().ToList();
+            var produto = _context.Produtos.FirstOrDefault();
 
-            if (produtos.IsNullOrEmpty())
+            if (produto is null)
             {
-                return NotFound("Produtos não encontrados");
+                return NotFound("Produto não encontrado");
             }
 
-            return produtos;
+            return produto;
+        }
+        // /produtos
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Produto>>> GetAsync()
+        {
+            return await _context.Produtos.AsNoTracking().ToListAsync();
+
         }
 
-        [HttpGet("{id:int}", Name ="ObterProduto")]
-        public ActionResult<Produto> Get(int id)
+        [HttpGet("{id}", Name ="ObterProduto")]
+        public async Task<ActionResult<Produto>> GetByIdAsync(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+            var produto = await _context.Produtos.AsNoTracking().FirstOrDefaultAsync(p => p.ProdutoId == id);
 
             if (produto == null)
             {
