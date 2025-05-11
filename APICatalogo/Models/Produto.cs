@@ -25,7 +25,7 @@ public class Produto : IValidatableObject
     [StringLength(300, MinimumLength = 10)]
     public string? ImagemUrl { get; set; }
     public float Estoque { get; set; }
-    public DateTime DataCadastro { get; set; }
+    public DateTime DataCadastro { get; set; } = DateTime.Now;
     public int CategoriaID { get; set; }
     [JsonIgnore]
     public Categoria? Categoria { get; set; }
