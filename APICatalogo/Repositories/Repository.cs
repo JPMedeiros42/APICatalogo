@@ -1,6 +1,9 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using X.PagedList;
+using X.PagedList.EF;
 
 namespace APICatalogo.Repositories;
 
@@ -12,14 +15,27 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _context = context;
     }
-    public IEnumerable<T> GetAll()
+    public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return _context.Set<T>().AsNoTracking().ToList();
+        return await _context.Set<T>().AsNoTracking().ToListAsync();
     }
     
-    public T? Get(Expression<Func<T, bool>> predicate)
+    public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
     {
-        return _context.Set<T>().FirstOrDefault(predicate);
+        return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+    }
+
+    public async Task<IPagedList<T>> GetFilterPagedAsync(Expression<Func<T, bool>>? predicate,
+            int pageNumber, int PageSize)
+    {
+        var query = _context.Set<T>().AsNoTracking();
+
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        return await query.ToPagedListAsync(pageNumber, PageSize);
     }
 
     public T Create(T entity)
